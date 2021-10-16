@@ -1,9 +1,9 @@
 import requests
 import time
 import os
-import config
 import json
 import hashlib
+
 class Downloader:
     def __init__(self, username, token, verbose=False):
         self.username = username
@@ -17,7 +17,6 @@ class Downloader:
             os.mkdir('downloads/')
         if not os.path.exists('mod-list/'):
             os.mkdir('mod-list/')
-
 
         # Download updated mod-list.json
         self.mod_list = self.get_modlist()
@@ -100,8 +99,6 @@ class Downloader:
                         print('    [-] Mod SHA1 doesn\'t match list')
                     os.remove(mod_path)
                     return False
-                
-
         except Exception as e:
             print(e)
 
