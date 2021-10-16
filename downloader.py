@@ -128,5 +128,5 @@ class Downloader:
             return calculated_sha1
 
 if __name__ == "__main__":
-    downloader = Downloader('ThePotato456', '', verbose=True)
+    downloader = Downloader('', '', verbose=True)
     downloader.download_mod(downloader.mod_list[0])
