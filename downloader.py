@@ -3,7 +3,6 @@ import os
 import config
 import json
 import hashlib
-
 class Downloader:
     def __init__(self, username, token, verbose=False):
         self.username = username
@@ -57,8 +56,62 @@ class Downloader:
             return json.load(open('mod-list/mod-list.json'))['results']
 
 
+    """
+    {
+        "name": "Age2Taunts",
+        "title": "Age2Taunts",
+        "owner": "Borderline-Creepy",
+        "summary": "Use 11 for when your friends get run over by a train",
+        "downloads_count": 10,
+        "category": "non-game-changing",
+        "score": 2.0,
+        "latest_release": {
+            "download_url": "/download/Age2Taunts/616a1913e0fed82bb6adff98",
+            "file_name": "Age2Taunts_0.1.1.zip",
+            "info_json": {
+                "factorio_version": "1.1"
+            },
+            "released_at": "2021-10-16T00:13:07.744000Z",
+            "version": "0.1.1",
+            "sha1": "7b8b6b36c7bd7f0b6f6fbf782042d0818e64ffe2"
+        }
+    }
+    """
     def download_mod(self, mod):
-        pass
+        try:
+            mod_name = mod['name']
+            mod_latest_release = mod['latest_release']
+            mod_download_url = mod_latest_release['download_url']
+            mod_file_name = mod_latest_release['file_name']
+            mod_sha1 = mod_latest_release['sha1']
+            mod_path = os.path.join('downloads/', mod_file_name)
+
+            if os.path.exists(mod_path):
+                local_file_sha1 = self.calculate_sha1sum(mod_path)
+                if local_file_sha1 == mod_sha1:
+                    if self.verbose:
+                        print('[*] Mod \'{}\' already downloaded, keeping local file: {}'.format(mod_name, mod_path))
+                    return True
+            else:
+                if self.verbose:
+                    print('[-] {} not found, retrieving...'.format(mod_file_name))
+                download_url = 'https://mods.factorio.com{}?username={}&token={}'.format(mod_download_url, self.username, self.token)
+                res = requests.get(download_url, stream=True)
+                open(mod_path, 'wb').write(res.content)
+                download_sha1 = self.calculate_sha1sum(mod_path)
+                if download_sha1 == mod_sha1:
+                    if self.verbose:
+                        print('[+] Mod SHA1 matches, keeping')
+                    return True
+                else:
+                    if self.verbose:
+                        print('[-] Mod SHA1 doesn\'t match list')
+                    os.remove(mod_path)
+                    return False
+                
+
+        except Exception as e:
+            print(e)
 
     def calculate_sha1sum(self, file_path):
         BUF_SIZE = 65536  # lets read stuff in 64kb chunks
@@ -75,5 +128,5 @@ class Downloader:
             return calculated_sha1
 
 if __name__ == "__main__":
-    downloader = Downloader('', '', verbose=True)
-    print(downloader.mod_list[0])
+    downloader = Downloader('ThePotato456', '', verbose=True)
+    downloader.download_mod(downloader.mod_list[0])
