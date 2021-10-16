@@ -1,5 +1,4 @@
 import requests
-import wget
 import os
 import config
 import json
